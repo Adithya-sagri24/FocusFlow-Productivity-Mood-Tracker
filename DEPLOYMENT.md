@@ -30,6 +30,11 @@ In your Vercel project's settings, navigate to **Settings** > **Environment Vari
 
 **Important:** For the Spotify integration to work after deployment, you must add your Vercel production URL to the "Redirect URIs" in your Spotify application settings. It will look something like `https://your-project-name.vercel.app/`.
 
+### Google Gemini
+
+-   `VITE_API_KEY`: Your API key for the Google Gemini API. You can get this from [Google AI Studio](https://aistudio.google.com/app/apikey).
+
+
 ## Step 4: Deploy
 
 After configuring the environment variables, trigger a new deployment from your Vercel project dashboard. Vercel will build your application and deploy it.

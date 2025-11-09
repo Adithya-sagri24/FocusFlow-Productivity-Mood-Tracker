@@ -1,4 +1,7 @@
 {
-  "name": "FocusFlow",
-  "description": "A productivity and mood tracking application with Spotify integration, and task management."
+  "name": "FocusFlow: AI Productivity & Mood Music",
+  "description": "An intelligent productivity app with a Pomodoro timer, task management, and mood-aware music recommendations.",
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

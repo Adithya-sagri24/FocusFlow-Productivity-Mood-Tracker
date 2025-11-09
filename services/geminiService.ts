@@ -1,9 +1,13 @@
 // Fix: Implemented the missing Gemini service for emotion detection.
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 
-// Per guidelines, initialize with a named parameter using process.env.API_KEY.
-// It's assumed that process.env.API_KEY is pre-configured and accessible.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Fix: Correctly access the API key using Vite's import.meta.env syntax.
+const apiKey = (import.meta as any).env.VITE_API_KEY;
+if (!apiKey) {
+    throw new Error("Gemini API key is required. Please set VITE_API_KEY in your environment variables.");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 const model = 'gemini-2.5-flash';
 

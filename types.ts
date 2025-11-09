@@ -1,3 +1,5 @@
+import type { Session } from '@supabase/supabase-js';
+
 export interface Task {
   id: number;
   user_id: string;
@@ -6,8 +8,13 @@ export interface Task {
   inserted_at: string;
 }
 
-export interface SpotifyArtist {
-  name: string;
+export interface SpotifyToken {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string;
+  created_at: number;
 }
 
 export interface SpotifyImage {
@@ -16,16 +23,20 @@ export interface SpotifyImage {
   width: number;
 }
 
+export interface SpotifyArtist {
+  name: string;
+}
+
 export interface SpotifyAlbum {
   images: SpotifyImage[];
 }
 
 export interface SpotifyTrack {
   id: string;
+  uri: string;
   name: string;
   artists: SpotifyArtist[];
   album: SpotifyAlbum;
-  uri: string;
   preview_url: string | null;
 }
 
@@ -35,18 +46,15 @@ export interface SpotifyPlaylistTrack {
 
 export interface SpotifyPlaylist {
   id: string;
-  name: string;
+  name:string;
   images: SpotifyImage[];
   tracks: {
     items: SpotifyPlaylistTrack[];
   };
 }
 
-export interface SpotifyToken {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  refresh_token: string;
-  scope: string;
-  created_at?: number; // to calculate expiry
-}
+export type PomodoroMode = 'work' | 'shortBreak' | 'longBreak';
+
+export type Page = 'dashboard' | 'tasks' | 'schedule' | 'analytics' | 'settings' | 'privacy';
+
+export { Session };

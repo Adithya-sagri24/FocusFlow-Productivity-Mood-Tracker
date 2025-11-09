@@ -1,5 +1,4 @@
 {
   "name": "FocusFlow",
-  "description": "A productivity and mood tracking application with Spotify integration, and task management.",
-  "requestFramePermissions": []
+  "description": "A productivity and mood tracking application with Spotify integration, and task management."
 }

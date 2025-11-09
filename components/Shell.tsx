@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from './Header';
-import type { Page } from '../App';
+import type { Page } from '../types';
 
 interface ShellProps {
   children: React.ReactNode;

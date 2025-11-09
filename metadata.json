@@ -1,4 +1,7 @@
 {
-  "name": "FocusFlow: Productivity & Mood Tracker",
-  "description": "An application to manage tasks, track work sessions, and monitor moods using Supabase for backend services."
+  "name": "FocusFlow",
+  "description": "A productivity and mood tracking application with Spotify integration, emotion detection, and task management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

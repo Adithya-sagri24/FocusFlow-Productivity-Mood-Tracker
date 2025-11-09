@@ -1,3 +1,5 @@
+// Fix: Import Jest globals to resolve TypeScript errors.
+import { describe, it, expect } from '@jest/globals';
 import { emotionToGenreMap } from '../../lib/emotionMapping';
 
 describe('emotionToGenreMap', () => {

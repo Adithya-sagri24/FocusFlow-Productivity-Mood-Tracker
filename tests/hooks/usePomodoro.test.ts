@@ -1,3 +1,5 @@
+// Fix: Import Jest globals to resolve TypeScript errors.
+import { describe, it, expect, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { usePomodoro } from '../../hooks/usePomodoro';
 

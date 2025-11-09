@@ -1,4 +1,47 @@
-<script type="importmap">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FocusFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Customizations for Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            900: '#111827',
+                            800: '#1F2937',
+                            700: '#374151',
+                            600: '#4B5563',
+                            500: '#6B7280',
+                            400: '#9CA3AF',
+                            300: '#D1D5DB',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+      body {
+        background-color: #111827; /* bg-gray-900 */
+        color: #f9fafb; /* text-gray-50 */
+        font-family: sans-serif;
+      }
+      .prose { color: #d1d5db; }
+      .prose h1, .prose h2, .prose h3, .prose h4 { color: #fff; }
+      .prose a { color: #a78bfa; }
+      .prose strong { color: #fff; }
+      .prose blockquote { border-left-color: #4b5563; }
+      .prose code { color: #f9fafb; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -7,8 +50,11 @@
     "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.80.0",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
     "zustand": "https://aistudiocdn.com/zustand@^5.0.8",
-    "@testing-library/react": "https://aistudiocdn.com/@testing-library/react@^16.3.0"
+    "@testing-library/react": "https://aistudiocdn.com/@testing-library/react@^16.3.0",
+    "@jest/globals": "https://aistudiocdn.com/@jest/globals@^30.2.0"
   }
 }
 </script>
-full contents of index.html
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>

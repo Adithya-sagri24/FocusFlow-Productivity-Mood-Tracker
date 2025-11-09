@@ -1,7 +1,9 @@
+/// <reference types="vite/client" />
 import { useState, useEffect, useCallback } from 'react';
 import type { SpotifyToken } from '../types';
 
-const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+// Fix: Use Vite's `import.meta.env` for environment variables.
+const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES = 'user-read-private user-read-email playlist-read-private';
 
@@ -24,7 +26,7 @@ export const useSpotifyAuth = () => {
 
   const login = () => {
     if (!CLIENT_ID) {
-      alert("Spotify Client ID is not configured. Please set REACT_APP_SPOTIFY_CLIENT_ID in your environment.");
+      alert("Spotify Client ID is not configured. Please set VITE_SPOTIFY_CLIENT_ID in your environment.");
       return;
     }
     const authUrl = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}`;

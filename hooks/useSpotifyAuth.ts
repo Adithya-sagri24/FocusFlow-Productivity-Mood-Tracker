@@ -1,9 +1,10 @@
-/// <reference types="vite/client" />
+// Fix: Removed `/// <reference types="vite/client" />` as it was causing a "Cannot find type definition" error.
 import { useState, useEffect, useCallback } from 'react';
 import type { SpotifyToken } from '../types';
 
 // Fix: Use Vite's `import.meta.env` for environment variables.
-const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+// Fix: Cast `import.meta` to `any` to bypass TypeScript errors about the missing `env` property.
+const CLIENT_ID = (import.meta as any).env.VITE_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES = 'user-read-private user-read-email playlist-read-private';
 

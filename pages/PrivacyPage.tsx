@@ -16,9 +16,9 @@ const PrivacyPage: React.FC = () => {
             We may collect information about you in a variety of ways. The information we may collect includes:
           </p>
           <ul>
-            <li><strong>Personal Data:</strong> Email address when you register.</li>
-            <li><strong>Usage Data:</strong> Information about your tasks and application usage.</li>
-            <li><strong>Camera Data:</strong> We access your camera to capture frames for emotion detection. These images are sent to a third-party API (Google Gemini) for analysis and are not stored by us.</li>
+            <li><strong>Personal Data:</strong> Email address when you register via Supabase Authentication.</li>
+            <li><strong>Usage Data:</strong> Information about your tasks and application usage (e.g., tasks you create, Pomodoro sessions you complete). This data is stored securely in our Supabase database and is protected by Row Level Security, meaning you can only access your own data.</li>
+            <li><strong>Spotify Data:</strong> If you connect your Spotify account, we store an authentication token in your browser's local storage to make requests to the Spotify API on your behalf. We do not store your Spotify data on our servers.</li>
           </ul>
           <h2>3. Use of Your Information</h2>
           <p>
@@ -26,12 +26,12 @@ const PrivacyPage: React.FC = () => {
           </p>
           <ul>
             <li>Create and manage your account.</li>
-            <li>Provide personalized music recommendations.</li>
+            <li>Provide personalized music recommendations through the Spotify API.</li>
             <li>Monitor and analyze usage and trends to improve your experience.</li>
           </ul>
           <h2>4. Security of Your Information</h2>
           <p>
-            We use administrative, technical, and physical security measures to help protect your personal information.
+            We use administrative, technical, and physical security measures to help protect your personal information. All data stored in our database is protected by Supabase's built-in security features.
           </p>
           <h2>5. Contact Us</h2>
           <p>

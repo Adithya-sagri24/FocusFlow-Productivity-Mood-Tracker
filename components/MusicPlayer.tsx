@@ -4,25 +4,26 @@ import { getPlaylistForEmotion } from '../services/spotifyService';
 import type { SpotifyPlaylist } from '../types';
 import Playlist from './Playlist';
 import Button from './ui/Button';
+import Card from './ui/Card';
+import { emotionToGenreMap } from '../lib/emotionMapping';
 
-interface MusicPlayerProps {
-  emotion: string | null;
-}
+const moods = Object.keys(emotionToGenreMap);
 
-const MusicPlayer: React.FC<MusicPlayerProps> = ({ emotion }) => {
+const MusicPlayer: React.FC = () => {
   const { token, login } = useSpotifyAuth();
   const [playlist, setPlaylist] = useState<SpotifyPlaylist | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
   const [currentPlayingUri, setCurrentPlayingUri] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (emotion && token) {
+    if (selectedEmotion && token) {
       setIsLoading(true);
       setError(null);
       setPlaylist(null);
-      getPlaylistForEmotion(emotion, token)
+      getPlaylistForEmotion(selectedEmotion, token)
         .then(data => {
           if (data) {
             setPlaylist(data);
@@ -33,7 +34,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ emotion }) => {
         .catch(() => setError('Failed to fetch playlist.'))
         .finally(() => setIsLoading(false));
     }
-  }, [emotion, token]);
+  }, [selectedEmotion, token]);
   
   const handlePlay = (trackUri: string) => {
     const track = playlist?.tracks.items.find(item => item.track.uri === trackUri)?.track;
@@ -62,33 +63,46 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ emotion }) => {
     }
   }, []);
 
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
   if (!token) {
     return (
-      <div className="text-center">
-        <h2 className="text-xl font-semibold text-white mb-4">Music Recommendations</h2>
-        <p className="text-gray-400 mb-4">Connect your Spotify account to get playlists based on your mood.</p>
-        <Button onClick={login}>Connect to Spotify</Button>
-      </div>
+      <Card>
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-semibold text-white mb-4">Music Recommendations</h2>
+          <p className="text-gray-400 mb-4">Connect your Spotify account to get playlists based on your mood.</p>
+          <Button onClick={login}>Connect to Spotify</Button>
+        </div>
+      </Card>
     );
   }
 
-  if (!emotion) {
-    return <p className="text-gray-400 text-center">Detect your emotion to get a playlist recommendation.</p>;
-  }
-
-  if (isLoading) {
-    return <p className="text-gray-400 text-center">Finding a playlist for you...</p>;
-  }
-
-  if (error) {
-    return <p className="text-red-400 text-center">{error}</p>;
-  }
-
   return (
-    <div>
-       <audio ref={audioRef} />
-       <Playlist playlist={playlist} onPlay={handlePlay} currentPlayingUri={currentPlayingUri} />
-    </div>
+    <Card>
+      <div className="p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">What's the vibe?</h2>
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          {moods.map(mood => (
+            <Button 
+              key={mood}
+              variant={selectedEmotion === mood ? 'primary' : 'secondary'}
+              onClick={() => setSelectedEmotion(mood)}
+              className="text-xs"
+            >
+              {capitalize(mood)}
+            </Button>
+          ))}
+        </div>
+        
+        {isLoading && <p className="text-gray-400 text-center">Finding a playlist for you...</p>}
+        {error && <p className="text-red-400 text-center">{error}</p>}
+        
+        <div className="mt-4">
+          <audio ref={audioRef} />
+          <Playlist playlist={playlist} onPlay={handlePlay} currentPlayingUri={currentPlayingUri} />
+        </div>
+      </div>
+    </Card>
   );
 };
 

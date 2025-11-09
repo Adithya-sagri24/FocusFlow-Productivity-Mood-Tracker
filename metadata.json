@@ -1,7 +1,5 @@
 {
   "name": "FocusFlow",
-  "description": "A productivity and mood tracking application with Spotify integration, emotion detection, and task management.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "description": "A productivity and mood tracking application with Spotify integration, and task management.",
+  "requestFramePermissions": []
 }

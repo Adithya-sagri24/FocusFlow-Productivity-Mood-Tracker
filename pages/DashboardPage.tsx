@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import EmotionDetector from '../components/EmotionDetector';
+import React from 'react';
 import MusicPlayer from '../components/MusicPlayer';
 import PomodoroTimer from '../components/PomodoroTimer';
 import TaskWidget from '../components/TaskWidget';
 import MoodChart from '../components/MoodChart';
 
 const DashboardPage: React.FC = () => {
-  const [detectedEmotion, setDetectedEmotion] = useState<string | null>(null);
 
   return (
     <div>
@@ -23,8 +21,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Right Column */}
         <div className="space-y-6">
-          <EmotionDetector onEmotionDetected={setDetectedEmotion} />
-          <MusicPlayer emotion={detectedEmotion} />
+          <MusicPlayer />
         </div>
       </div>
     </div>

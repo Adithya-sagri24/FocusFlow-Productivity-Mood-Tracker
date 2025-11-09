@@ -28,10 +28,6 @@ In your Vercel project's settings, navigate to **Settings** > **Environment Vari
 
 -   `VITE_SPOTIFY_CLIENT_ID`: Your Spotify application's Client ID. You can get this from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
 
-### Google Gemini API
-
--   `VITE_API_KEY`: Your Google Gemini API key. You can get this from [Google AI Studio](https://aistudio.google.com/app/apikey).
-
 **Important:** For the Spotify integration to work after deployment, you must add your Vercel production URL to the "Redirect URIs" in your Spotify application settings. It will look something like `https://your-project-name.vercel.app/`.
 
 ## Step 4: Deploy

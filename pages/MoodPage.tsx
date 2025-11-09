@@ -1,13 +1,14 @@
 // Fix: Implemented the missing Mood page to integrate emotion detection and music.
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSpotifyAuth } from '../hooks/useSpotifyAuth';
 import { getPlaylistForEmotion } from '../services/spotifyService';
 import type { SpotifyPlaylist, SpotifyTrack } from '../types';
-import CameraFeed from '../components/CameraFeed';
-import EmotionDetector from '../components/EmotionDetector';
 import Playlist from '../components/Playlist';
 import MusicPlayer from '../components/MusicPlayer';
 import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+
+const moods = ['Happy', 'Sad', 'Focus', 'Chill', 'Energetic', 'Romantic'];
 
 const MoodPage: React.FC = () => {
   const { token, login } = useSpotifyAuth();
@@ -16,7 +17,6 @@ const MoodPage: React.FC = () => {
   const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
   const [currentPlayingUri, setCurrentPlayingUri] = useState<string | null>(null);
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (currentEmotion && token) {
@@ -31,7 +31,7 @@ const MoodPage: React.FC = () => {
     }
   }, [currentEmotion, token]);
 
-  const handleEmotionChange = (emotion: string) => {
+  const handleEmotionSelect = (emotion: string) => {
     setCurrentEmotion(emotion);
   };
   
@@ -56,10 +56,6 @@ const MoodPage: React.FC = () => {
     setCurrentTrack(null);
   };
 
-  const captureFrame = (video: HTMLVideoElement) => {
-    videoRef.current = video;
-  };
-
   if (!token) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
@@ -75,32 +71,44 @@ const MoodPage: React.FC = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Mood Music</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="space-y-6">
-          <CameraFeed onFrame={captureFrame} />
-          <EmotionDetector onEmotionChange={handleEmotionChange} videoElement={videoRef.current} />
-        </div>
-        <div className="lg:col-span-2">
-          {isLoadingPlaylist && <p className="text-center">Finding a vibe for you...</p>}
-          {!isLoadingPlaylist && playlist && (
-            <Playlist 
-              playlist={playlist} 
-              onPlay={handlePlayTrack}
-              currentPlayingUri={currentPlayingUri}
-            />
-          )}
-          {!isLoadingPlaylist && !playlist && currentEmotion && (
-            <p className="text-center text-gray-400">
-              Could not find a playlist for "{currentEmotion}". Try detecting your mood again.
-            </p>
-          )}
-           {!isLoadingPlaylist && !playlist && !currentEmotion && (
-            <p className="text-center text-gray-400">
-              Detect your mood to get a personalized playlist.
-            </p>
-          )}
-        </div>
-      </div>
+      <Card>
+          <div className="p-6">
+              <h2 className="text-xl font-semibold text-center mb-4">How are you feeling?</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                  {moods.map(mood => (
+                      <Button 
+                        key={mood}
+                        variant={currentEmotion === mood ? 'primary' : 'secondary'}
+                        onClick={() => handleEmotionSelect(mood)}
+                      >
+                          {mood}
+                      </Button>
+                  ))}
+              </div>
+
+              {isLoadingPlaylist && <p className="text-center">Finding a vibe for you...</p>}
+              
+              {!isLoadingPlaylist && playlist && (
+                <Playlist 
+                  playlist={playlist} 
+                  onPlay={handlePlayTrack}
+                  currentPlayingUri={currentPlayingUri}
+                />
+              )}
+              
+              {!isLoadingPlaylist && !playlist && currentEmotion && (
+                <p className="text-center text-gray-400">
+                  Could not find a playlist for "{currentEmotion}". Try another mood.
+                </p>
+              )}
+
+              {!isLoadingPlaylist && !playlist && !currentEmotion && (
+                <p className="text-center text-gray-400">
+                  Select a mood to get a personalized playlist.
+                </p>
+              )}
+          </div>
+      </Card>
       <MusicPlayer track={currentTrack} onEnd={handleTrackEnd} />
     </div>
   );

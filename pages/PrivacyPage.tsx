@@ -26,12 +26,12 @@ const PrivacyPage: React.FC = () => {
           </p>
           <ul>
             <li>Create and manage your account.</li>
-            <li>Provide personalized music recommendations through the Spotify API.</li>
+            <li>Provide personalized music recommendations through the Spotify API based on moods you select.</li>
             <li>Monitor and analyze usage and trends to improve your experience.</li>
           </ul>
           <h2>4. Security of Your Information</h2>
           <p>
-            We use administrative, technical, and physical security measures to help protect your personal information. All data stored in our database is protected by Supabase's built-in security features.
+            We use administrative, technical, and physical security measures to help protect your personal information. All data stored in our database is protected by Supabase's built-in security features. We do not use your device's camera or microphone.
           </p>
           <h2>5. Contact Us</h2>
           <p>

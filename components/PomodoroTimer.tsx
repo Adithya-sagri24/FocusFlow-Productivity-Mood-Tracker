@@ -1,67 +1,69 @@
+// Fix: Implemented the missing PomodoroTimer UI component.
 import React, { useState } from 'react';
 import { usePomodoro } from '../hooks/usePomodoro';
-import Button from './ui/Button';
-import Card from './ui/Card';
 import CircularCountdown from './CircularCountdown';
+import Button from './ui/Button';
+import IconButton from './ui/IconButton';
+import { PlayIcon, PauseIcon, ResetIcon, SettingsIcon } from './icons';
 import PomodoroSettingsModal from './PomodoroSettingsModal';
-import { SettingsIcon } from './icons';
 
 const PomodoroTimer: React.FC = () => {
-    // A real implementation would persist these settings
-    const [settings, setSettings] = useState({ work: 25, shortBreak: 5, longBreak: 15 });
-    const { timeLeft, mode, isActive, toggleTimer, resetTimer } = usePomodoro(settings);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState({ work: 25, shortBreak: 5, longBreak: 15 });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  const { timeLeft, mode, isActive, cycles, toggleTimer, resetTimer } = usePomodoro(settings);
 
-    const totalTime = {
-        work: settings.work * 60,
-        shortBreak: settings.shortBreak * 60,
-        longBreak: settings.longBreak * 60,
-    }[mode];
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const secs = (seconds % 60).toString().padStart(2, '0');
-        return `${mins}:${secs}`;
-    };
+  const totalDuration = (mode === 'work' ? settings.work : mode === 'shortBreak' ? settings.shortBreak : settings.longBreak) * 60;
+  const percentage = (timeLeft / totalDuration) * 100;
+  
+  const modeText = {
+    work: 'Focus',
+    shortBreak: 'Short Break',
+    longBreak: 'Long Break',
+  };
 
-    const modeText = {
-        work: 'Focus Time',
-        shortBreak: 'Short Break',
-        longBreak: 'Long Break',
-    }[mode];
+  const handleSaveSettings = (newSettings: { work: number; shortBreak: number; longBreak: number; }) => {
+    setSettings(newSettings);
+  };
 
-    return (
-        <Card>
-            <div className="p-6 flex flex-col items-center">
-                <div className="w-full flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">{modeText}</h2>
-                    <Button variant="subtle" onClick={() => setIsSettingsOpen(true)}>
-                        <SettingsIcon className="w-5 h-5"/>
-                    </Button>
-                </div>
-                
-                <CircularCountdown
-                    percentage={(timeLeft / totalTime) * 100}
-                    time={formatTime(timeLeft)}
-                />
+  return (
+    <div className="flex flex-col items-center justify-center p-6 bg-gray-800 rounded-lg">
+      <div className="flex justify-between w-full items-center mb-4">
+        <span className="text-lg font-semibold">{modeText[mode]}</span>
+        <IconButton onClick={() => setIsSettingsOpen(true)}>
+            <SettingsIcon className="w-6 h-6" />
+        </IconButton>
+      </div>
 
-                <div className="flex space-x-4 mt-6">
-                    <Button onClick={toggleTimer} className="w-32">
-                        {isActive ? 'Pause' : 'Start'}
-                    </Button>
-                    <Button variant="secondary" onClick={resetTimer}>
-                        Reset
-                    </Button>
-                </div>
-            </div>
-            <PomodoroSettingsModal
-                isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
-                settings={settings}
-                onSave={setSettings}
-            />
-        </Card>
-    );
+      <CircularCountdown percentage={percentage} time={formatTime(timeLeft)} />
+      
+      <div className="mt-6 flex items-center space-x-4">
+        <IconButton onClick={resetTimer} className="bg-gray-700 hover:bg-gray-600">
+            <ResetIcon className="w-6 h-6"/>
+        </IconButton>
+        <Button onClick={toggleTimer} className="w-32 h-16 text-2xl !rounded-full">
+          {isActive ? <PauseIcon className="w-8 h-8" /> : <PlayIcon className="w-8 h-8" />}
+        </Button>
+        <div className="w-10 text-center">
+            <span className="font-bold text-lg">{cycles}</span>
+            <span className="text-sm block">/ 4</span>
+        </div>
+      </div>
+      
+      <PomodoroSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={settings}
+        onSave={handleSaveSettings}
+      />
+    </div>
+  );
 };
 
 export default PomodoroTimer;

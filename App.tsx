@@ -1,53 +1,46 @@
+// Fix: Implemented the main App component to handle authentication and page routing.
 import React, { useState } from 'react';
-import { useAuth } from './hooks/useAuth';
 import Auth from './components/Auth';
 import Shell from './components/Shell';
-import DashboardPage from './pages/DashboardPage';
+import HomePage from './pages/HomePage';
 import TasksPage from './pages/TasksPage';
 import SchedulePage from './pages/SchedulePage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import MoodPage from './pages/MoodPage';
 import SettingsPage from './pages/SettingsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import { useAuth } from './hooks/useAuth';
 import type { Page } from './types';
 
+function App() {
+  const { session } = useAuth();
+  const [currentPage, setCurrentPage] = useState<Page>('Home');
 
-const App: React.FC = () => {
-  const { session, loading } = useAuth();
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
-  
   const renderPage = () => {
     switch (currentPage) {
-      case 'dashboard':
-        return <DashboardPage />;
-      case 'tasks':
+      case 'Home':
+        return <HomePage setCurrentPage={setCurrentPage} />;
+      case 'Tasks':
         return <TasksPage />;
-      case 'schedule':
+      case 'Schedule':
         return <SchedulePage />;
-      case 'analytics':
+      case 'Analytics':
         return <AnalyticsPage />;
-      case 'settings':
-        return <SettingsPage />;
-      case 'privacy':
-        return <PrivacyPage />;
+      case 'Mood':
+        return <MoodPage />;
+      case 'Settings':
+          return <SettingsPage />;
+      case 'Privacy':
+          return <PrivacyPage />;
       default:
-        return <DashboardPage />;
+        return <HomePage setCurrentPage={setCurrentPage} />;
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <p className="text-white">Loading...</p>
-      </div>
-    );
-  }
 
   if (!session) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="max-w-md w-full">
-          <Auth />
-        </div>
+        <Auth />
       </div>
     );
   }
@@ -57,6 +50,6 @@ const App: React.FC = () => {
       {renderPage()}
     </Shell>
   );
-};
+}
 
 export default App;

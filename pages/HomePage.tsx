@@ -1,12 +1,14 @@
+// Fix: Implemented the missing HomePage.
 import React from 'react';
+import DashboardPage from './DashboardPage';
+import type { Page } from '../types';
 
-const HomePage: React.FC = () => {
-  return (
-    <div className="text-center">
-      <h1 className="text-4xl font-bold">Welcome to FocusFlow</h1>
-      <p className="mt-4 text-lg">Your all-in-one productivity dashboard.</p>
-    </div>
-  );
+interface HomePageProps {
+    setCurrentPage: (page: Page) => void;
+}
+
+const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
+    return <DashboardPage setCurrentPage={setCurrentPage} />
 };
 
 export default HomePage;

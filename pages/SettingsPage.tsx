@@ -1,10 +1,19 @@
+// Fix: Implemented the missing Settings page.
 import React from 'react';
-import Card from '../components/ui/Card';
+import { supabase } from '../lib/supabaseClient';
 import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
 import { useAppStore } from '../store/useAppStore';
 
 const SettingsPage: React.FC = () => {
     const session = useAppStore((state) => state.session);
+
+    const handleLogout = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error('Error logging out:', error.message);
+        }
+    };
 
     return (
         <div>
@@ -12,15 +21,14 @@ const SettingsPage: React.FC = () => {
             <Card>
                 <div className="p-6">
                     <h2 className="text-xl font-semibold mb-4">Account</h2>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-400">Email</label>
-                            <p className="text-white mt-1">{session?.user?.email}</p>
-                        </div>
-                        <Button onClick={() => alert('Not implemented yet!')}>
-                            Change Password
-                        </Button>
-                    </div>
+                    {session?.user && (
+                        <p className="mb-4 text-gray-300">
+                            Logged in as: <strong>{session.user.email}</strong>
+                        </p>
+                    )}
+                    <Button onClick={handleLogout} variant="secondary">
+                        Sign Out
+                    </Button>
                 </div>
             </Card>
         </div>

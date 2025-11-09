@@ -1,79 +1,92 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import type { PomodoroMode } from '../types';
+// Fix: Implemented the `usePomodoro` hook based on its test file.
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-const WORK_MINS = 25;
-const SHORT_BREAK_MINS = 5;
-const LONG_BREAK_MINS = 15;
-const CYCLES_BEFORE_LONG_BREAK = 4;
+type PomodoroMode = 'work' | 'shortBreak' | 'longBreak';
 
-export const usePomodoro = (
-    settings = { work: WORK_MINS, shortBreak: SHORT_BREAK_MINS, longBreak: LONG_BREAK_MINS }
-) => {
-    const [mode, setMode] = useState<PomodoroMode>('work');
-    const [timeLeft, setTimeLeft] = useState(settings.work * 60);
-    const [isActive, setIsActive] = useState(false);
-    const [cycles, setCycles] = useState(0);
+interface PomodoroSettings {
+  work: number;
+  shortBreak: number;
+  longBreak: number;
+}
 
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+export const usePomodoro = (initialSettings: PomodoroSettings = { work: 25, shortBreak: 5, longBreak: 15 }) => {
+  const [settings] = useState(initialSettings);
+  const [mode, setMode] = useState<PomodoroMode>('work');
+  const [timeLeft, setTimeLeft] = useState(settings.work * 60);
+  const [isActive, setIsActive] = useState(false);
+  const [cycles, setCycles] = useState(0);
+  const longBreakInterval = 4;
 
-    const timeForMode: Record<PomodoroMode, number> = {
-        work: settings.work * 60,
-        shortBreak: settings.shortBreak * 60,
-        longBreak: settings.longBreak * 60,
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const switchMode = useCallback(() => {
+    setIsActive(false);
+    if (mode === 'work') {
+      const newCycles = cycles + 1;
+      setCycles(newCycles);
+      if (newCycles % longBreakInterval === 0) {
+        setMode('longBreak');
+        setTimeLeft(settings.longBreak * 60);
+      } else {
+        setMode('shortBreak');
+        setTimeLeft(settings.shortBreak * 60);
+      }
+    } else {
+      setMode('work');
+      setTimeLeft(settings.work * 60);
+    }
+  }, [mode, cycles, settings]);
+
+  useEffect(() => {
+    if (isActive) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime > 1) {
+            return prevTime - 1;
+          }
+          switchMode();
+          // We return the new time directly to avoid a 1s lag in display
+          const nextMode = mode === 'work' 
+            ? ((cycles + 1) % longBreakInterval === 0 ? 'longBreak' : 'shortBreak') 
+            : 'work';
+          if (nextMode === 'work') return settings.work * 60;
+          if (nextMode === 'shortBreak') return settings.shortBreak * 60;
+          return settings.longBreak * 60;
+        });
+      }, 1000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
+  }, [isActive, switchMode, cycles, mode, settings]);
+  
+  const toggleTimer = () => {
+    setIsActive(!isActive);
+  };
 
-    const switchMode = useCallback(() => {
-        setIsActive(false);
-        if (mode === 'work') {
-            const newCycles = cycles + 1;
-            setCycles(newCycles);
-            if (newCycles % CYCLES_BEFORE_LONG_BREAK === 0) {
-                setMode('longBreak');
-                setTimeLeft(timeForMode.longBreak);
-            } else {
-                setMode('shortBreak');
-                setTimeLeft(timeForMode.shortBreak);
-            }
-        } else {
-            setMode('work');
-            setTimeLeft(timeForMode.work);
-        }
-    }, [mode, cycles, timeForMode]);
+  const resetTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    setIsActive(false);
+    setMode('work');
+    setTimeLeft(settings.work * 60);
+    setCycles(0);
+  };
+  
+  // Effect to update timeleft if settings change
+  useEffect(() => {
+    if (!isActive) {
+      if (mode === 'work') setTimeLeft(settings.work * 60);
+      else if (mode === 'shortBreak') setTimeLeft(settings.shortBreak * 60);
+      else if (mode === 'longBreak') setTimeLeft(settings.longBreak * 60);
+    }
+  }, [settings, mode, isActive]);
 
-    useEffect(() => {
-        if (isActive) {
-            intervalRef.current = setInterval(() => {
-                setTimeLeft(prev => {
-                    if (prev <= 1) {
-                        switchMode();
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        } else {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        }
-
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        };
-    }, [isActive, switchMode]);
-
-    const toggleTimer = () => {
-        setIsActive(!isActive);
-    };
-
-    const resetTimer = () => {
-        setIsActive(false);
-        setMode('work');
-        setTimeLeft(timeForMode.work);
-        setCycles(0);
-    };
-
-    return { timeLeft, mode, isActive, cycles, toggleTimer, resetTimer, setTimeLeft };
+  return { timeLeft, mode, isActive, cycles, toggleTimer, resetTimer };
 };

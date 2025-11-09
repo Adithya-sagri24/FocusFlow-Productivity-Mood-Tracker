@@ -1,4 +1,7 @@
-import type { Session } from '@supabase/supabase-js';
+// Fix: Implemented the missing type definitions for the application.
+import { Session } from '@supabase/supabase-js';
+
+export type { Session };
 
 export interface Task {
   id: number;
@@ -8,53 +11,51 @@ export interface Task {
   inserted_at: string;
 }
 
+export type Page = 'Home' | 'Tasks' | 'Schedule' | 'Analytics' | 'Mood' | 'Settings' | 'Privacy';
+
+// Spotify Types
 export interface SpotifyToken {
   access_token: string;
   token_type: string;
   expires_in: number;
-  refresh_token: string;
   scope: string;
+  refresh_token: string;
   created_at: number;
 }
 
 export interface SpotifyImage {
   url: string;
-  height: number;
-  width: number;
+  height: number | null;
+  width: number | null;
 }
 
 export interface SpotifyArtist {
   name: string;
+  id: string;
 }
 
 export interface SpotifyAlbum {
+  id: string;
+  name: string;
   images: SpotifyImage[];
 }
 
 export interface SpotifyTrack {
   id: string;
-  uri: string;
   name: string;
+  uri: string;
+  preview_url: string | null;
   artists: SpotifyArtist[];
   album: SpotifyAlbum;
-  preview_url: string | null;
-}
-
-export interface SpotifyPlaylistTrack {
-  track: SpotifyTrack;
 }
 
 export interface SpotifyPlaylist {
   id: string;
-  name:string;
+  name: string;
   images: SpotifyImage[];
   tracks: {
-    items: SpotifyPlaylistTrack[];
+    items: {
+      track: SpotifyTrack | null;
+    }[];
   };
 }
-
-export type PomodoroMode = 'work' | 'shortBreak' | 'longBreak';
-
-export type Page = 'dashboard' | 'tasks' | 'schedule' | 'analytics' | 'settings' | 'privacy';
-
-export { Session };

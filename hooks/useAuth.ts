@@ -1,27 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useAppStore } from '../store/useAppStore';
+// Fix: Implemented the `useAuth` hook to manage Supabase authentication state.
+import { useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import type { Session } from '../types';
+import { useAppStore } from '../store/useAppStore';
 
 export const useAuth = () => {
-  const [loading, setLoading] = useState(true);
-  const session = useAppStore((state) => state.session);
-  const setSession = useAppStore((state) => state.setSession);
+  const { session, setSession } = useAppStore();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session as Session | null);
-      setLoading(false);
+      setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session as Session | null);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
     return () => subscription.unsubscribe();
   }, [setSession]);
 
-  return { session, loading };
+  return { session };
 };

@@ -1,4 +1,5 @@
-import create from 'zustand';
+// Fix: Implemented the missing Zustand store for managing global application state.
+import { create } from 'zustand';
 import type { Session } from '../types';
 
 interface AppState {

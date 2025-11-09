@@ -1,93 +1,91 @@
-// Fix: Implemented the EmotionDetector component.
-import React, { useState, useCallback, useRef } from 'react';
-import CameraFeed from './CameraFeed';
-import { getEmotionFromImage } from '../services/geminiService';
+// Fix: Implemented the missing EmotionDetector component.
+import React, { useState, useCallback } from 'react';
+import { detectEmotion } from '../services/geminiService';
 import Button from './ui/Button';
-import Card from './ui/Card';
 
 interface EmotionDetectorProps {
-  onEmotionDetected: (emotion: string) => void;
+  onEmotionChange: (emotion: string) => void;
+  videoElement: HTMLVideoElement | null;
 }
 
-const EmotionDetector: React.FC<EmotionDetectorProps> = ({ onEmotionDetected }) => {
-  const [loading, setLoading] = useState(false);
+const EmotionDetector: React.FC<EmotionDetectorProps> = ({ onEmotionChange, videoElement }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [detectedEmotion, setDetectedEmotion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [lastDetectedEmotion, setLastDetectedEmotion] = useState<string | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
+  
   const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result.split(',')[1]);
-        } else {
-          reject(new Error('Failed to convert blob to base64 string'));
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              if (typeof reader.result === 'string') {
+                  // The result includes the data URL prefix, which needs to be removed.
+                  const base64Data = reader.result.split(',')[1];
+                  resolve(base64Data);
+              } else {
+                  reject(new Error('Failed to convert blob to base64 string.'));
+              }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+      });
+  }
 
-  const handleFrame = (video: HTMLVideoElement) => {
-    videoRef.current = video;
-  };
-
-  const analyzeEmotion = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    
-    setLoading(true);
-    setError(null);
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-
-    if (context) {
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          try {
-            const base64Image = await blobToBase64(blob);
-            const emotion = await getEmotionFromImage(base64Image);
-            setLastDetectedEmotion(emotion);
-            onEmotionDetected(emotion);
-          } catch (err) {
-            setError('Failed to analyze emotion.');
-            console.error(err);
-          } finally {
-            setLoading(false);
-          }
-        } else {
-          setError('Failed to capture frame.');
-          setLoading(false);
-        }
-      }, 'image/jpeg');
+  const handleDetectEmotion = useCallback(async () => {
+    if (!videoElement) {
+        setError("Camera not ready.");
+        return;
     }
-  }, [onEmotionDetected]);
+    
+    setIsLoading(true);
+    setError(null);
+    setDetectedEmotion(null);
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    const context = canvas.getContext('2d');
+    if (!context) {
+        setError("Could not get canvas context.");
+        setIsLoading(false);
+        return;
+    }
+    context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+    
+    canvas.toBlob(async (blob) => {
+        if (!blob) {
+            setError("Could not capture frame from camera.");
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const base64Data = await blobToBase64(blob);
+            const mimeType = 'image/jpeg';
+            const emotion = await detectEmotion(base64Data, mimeType);
+            setDetectedEmotion(emotion);
+            onEmotionChange(emotion);
+        } catch (err: any) {
+            setError(err.message || 'Failed to detect emotion.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, 'image/jpeg', 0.9);
+
+  }, [videoElement, onEmotionChange]);
 
   return (
-    <Card>
-      <div className="p-4">
-        <h2 className="text-xl font-semibold mb-4 text-center">Mood Playlist Generator</h2>
-        <p className="text-gray-400 text-center mb-4">Let's find the perfect music for your current mood.</p>
-        <CameraFeed onFrame={handleFrame} />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
-        <div className="mt-4 text-center">
-            <Button onClick={analyzeEmotion} disabled={loading} className="mb-4">
-                {loading ? 'Analyzing...' : 'Get My Vibe'}
-            </Button>
-            {error && <p className="text-red-400">{error}</p>}
-            {lastDetectedEmotion && !loading && (
-                <p className="text-lg">Detected Mood: <span className="font-bold capitalize text-green-400">{lastDetectedEmotion}</span></p>
-            )}
-        </div>
-      </div>
-    </Card>
+    <div className="p-4 bg-gray-800 rounded-lg text-center">
+      <h3 className="text-lg font-semibold mb-4">Mood Detection</h3>
+      <Button onClick={handleDetectEmotion} disabled={isLoading || !videoElement}>
+        {isLoading ? 'Analyzing...' : 'Detect My Mood'}
+      </Button>
+      {error && <p className="text-red-400 mt-2 text-sm">{error}</p>}
+      {detectedEmotion && !isLoading && (
+        <p className="mt-3 text-lg">
+          Detected Mood: <span className="font-bold capitalize text-purple-400">{detectedEmotion}</span>
+        </p>
+      )}
+    </div>
   );
 };
 

@@ -1,7 +1,9 @@
-// Fix: Implemented the missing type definitions for the application.
-import { Session } from '@supabase/supabase-js';
+// Fix: Implemented missing type definitions used throughout the application.
+import type { Session as SupabaseSession } from '@supabase/supabase-js';
 
-export type { Session };
+export type Session = SupabaseSession;
+
+export type Page = 'Dashboard' | 'Tasks' | 'Schedule' | 'Analytics' | 'Mood' | 'Settings' | 'Privacy';
 
 export interface Task {
   id: number;
@@ -11,16 +13,14 @@ export interface Task {
   inserted_at: string;
 }
 
-export type Page = 'Home' | 'Tasks' | 'Schedule' | 'Analytics' | 'Mood' | 'Settings' | 'Privacy';
-
-// Spotify Types
+// Based on Spotify API documentation
 export interface SpotifyToken {
   access_token: string;
   token_type: string;
   expires_in: number;
   scope: string;
   refresh_token: string;
-  created_at: number;
+  created_at?: number;
 }
 
 export interface SpotifyImage {
@@ -32,6 +32,7 @@ export interface SpotifyImage {
 export interface SpotifyArtist {
   name: string;
   id: string;
+  uri: string;
 }
 
 export interface SpotifyAlbum {
@@ -43,10 +44,10 @@ export interface SpotifyAlbum {
 export interface SpotifyTrack {
   id: string;
   name: string;
-  uri: string;
-  preview_url: string | null;
   artists: SpotifyArtist[];
   album: SpotifyAlbum;
+  uri: string;
+  preview_url: string | null;
 }
 
 export interface SpotifyPlaylist {
@@ -54,8 +55,6 @@ export interface SpotifyPlaylist {
   name: string;
   images: SpotifyImage[];
   tracks: {
-    items: {
-      track: SpotifyTrack | null;
-    }[];
+    items: { track: SpotifyTrack | null }[];
   };
 }

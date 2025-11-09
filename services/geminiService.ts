@@ -1,55 +1,65 @@
-// Fix: Implemented the geminiService to provide emotion detection functionality.
-import { GoogleGenAI } from "@google/genai";
+// Fix: Implemented the missing Gemini service for emotion detection.
+import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 
-// Ensure API_KEY is available in the environment variables
-const apiKey = process.env.API_KEY;
-if (!apiKey) {
-  // This will be handled by the user's environment setup as per guidelines.
-  console.warn("API_KEY environment variable is not set for Gemini.");
-}
-
-const ai = new GoogleGenAI({ apiKey: apiKey || '' });
+// Per guidelines, initialize with a named parameter using process.env.API_KEY.
+// It's assumed that process.env.API_KEY is pre-configured and accessible.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const model = 'gemini-2.5-flash';
 
-const predefinedEmotions = ['happy', 'sad', 'angry', 'surprised', 'neutral', 'fearful'];
-
-export const getEmotionFromImage = async (base64Image: string): Promise<string> => {
-  if (!apiKey) {
-    console.error("Gemini API key is missing.");
-    return 'neutral';
-  }
-  try {
-    const response = await ai.models.generateContent({
-      model,
-      contents: [
-        {
-          parts: [
-            {
-              text: `Analyze the dominant emotion of the person in this image. Respond with only one of the following words: ${predefinedEmotions.join(', ')}.`,
+/**
+ * Detects the dominant emotion from an image.
+ * @param imageBase64 The base64 encoded image data.
+ * @param mimeType The MIME type of the image.
+ * @returns The detected emotion as a string (e.g., 'happy', 'sad').
+ */
+export const detectEmotion = async (imageBase64: string, mimeType: string): Promise<string> => {
+    try {
+        const imagePart = {
+            inlineData: {
+                data: imageBase64,
+                mimeType,
             },
-            {
-              inlineData: {
-                mimeType: 'image/jpeg',
-                data: base64Image,
-              },
-            },
-          ],
-        },
-      ],
-    });
+        };
 
-    const emotion = response.text.trim().toLowerCase();
+        const textPart = {
+            text: "Analyze the person's facial expression in this image and identify the dominant emotion. Choose one from: neutral, happy, sad, angry, surprised, fearful."
+        };
 
-    if (predefinedEmotions.includes(emotion)) {
-      return emotion;
-    } else {
-      console.warn(`Gemini returned an unexpected emotion: "${emotion}". Defaulting to neutral.`);
-      return 'neutral';
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: model,
+            contents: { parts: [imagePart, textPart] },
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        emotion: {
+                            type: Type.STRING,
+                            description: 'The detected dominant emotion from the list: neutral, happy, sad, angry, surprised, fearful.',
+                        },
+                    },
+                    required: ["emotion"],
+                }
+            }
+        });
+
+        const jsonStr = response.text.trim();
+        const result = JSON.parse(jsonStr);
+        // Make it robust by converting to lower case
+        const emotion = result.emotion ? String(result.emotion).toLowerCase() : 'neutral';
+
+        // Validate against a list of expected emotions
+        const validEmotions = ['neutral', 'happy', 'sad', 'angry', 'surprised', 'fearful'];
+        if (validEmotions.includes(emotion)) {
+            return emotion;
+        } else {
+            console.warn(`Unexpected emotion detected: ${emotion}. Defaulting to neutral.`);
+            return 'neutral';
+        }
+    } catch (error) {
+        console.error("Error detecting emotion with Gemini API:", error);
+        // Fallback in case of API error
+        return 'neutral';
     }
-  } catch (error) {
-    console.error("Error detecting emotion with Gemini:", error);
-    // Return a default emotion on error
-    return 'neutral';
-  }
 };
